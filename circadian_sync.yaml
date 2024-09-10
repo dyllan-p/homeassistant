@@ -1,6 +1,6 @@
 blueprint:
-  name: Match Outside Colour Temperature Kelvin with Dynamic Brightness
-  description: When a light turns on or the sun elevation changes, match the outside colour temperature and adjust brightness based on the sun's elevation. It triggers whenever a bulb turns on, on sun elevation changes, and every 5 minutes.
+  name: Circadian Sync
+  description: Follows the elevation of the sun to sync colour temp and brightness
   domain: automation
   input:
     target_lights:
