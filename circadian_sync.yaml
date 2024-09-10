@@ -91,7 +91,10 @@ action:
             data:
               kelvin: '{{ color_temp }}'
               transition: 5
-              brightness: '{{ ((state_attr("sun.sun", "elevation") | float + 10) / 80 * 255) | int | max(1) | min(255) }}'
+              brightness: >-
+                {% set elevation = state_attr("sun.sun", "elevation") | float %}
+                {% set brightness_value = ((elevation + 10) / 80) * 255 %}
+                {{ brightness_value | int | max(1) | min(255) }}
             target:
               entity_id: '{{ target_on_lights }}'
 mode: parallel
