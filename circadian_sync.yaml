@@ -40,7 +40,7 @@ blueprint:
           target:
             entity_id: '{{ trigger.entity_id }}'
           alias: Default - Set light to its original brightness, don't use brightness 1 as it causes issues with some bulbs
-  source_url: https://github.com/dyllan-p/homeassistant/blob/c06c68c5ef779875b52c8958909c7045cba9d5ba/circadian_sync.yaml
+  source_url: https://gist.github.com/HarvsG/cc86381dc99169159d6d4cd870c36e46
 variables:
   target_lights: !input target_lights
   target_on_lights: '{{ states.light | selectattr(''state'', ''eq'', ''on'') | selectattr(''attributes.supported_color_modes'', ''match'', ".*color_temp.*") | map(attribute=''entity_id'') | select("in", target_lights) | list }}'
@@ -77,7 +77,8 @@ action:
           - delay:
               milliseconds: 500
           - choose:
-              default: !input brightness_action
+              - conditions: []
+                sequence: !input brightness_action
       - conditions:
           - condition: or
             conditions:
