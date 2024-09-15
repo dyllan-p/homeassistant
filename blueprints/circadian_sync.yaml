@@ -51,4 +51,4 @@ action:
               entity_id: !input light_group
             data:
               brightness: 3  # 1% of 255
-              kelvin: 2700
+              kelvin: 2000
