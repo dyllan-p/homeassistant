@@ -1,6 +1,6 @@
 blueprint:
-  name: Circadian Lighting for TP-Link Bulbs
-  description: Adjusts brightness and color temperature of TP-Link bulbs based on sun position
+  name: Circadian Lighting for TP-Link Bulbs with Custom Times
+  description: Adjusts brightness and color temperature of TP-Link bulbs based on sun position and specific times
   domain: automation
   input:
     light_group:
@@ -17,21 +17,44 @@ variables:
 trigger:
   - platform: time_pattern
     minutes: "/5"
-  - platform: sun
-    event: sunrise
+  - platform: time
+    at: "05:00:00"
   - platform: sun
     event: sunset
+  - platform: time
+    at: "22:00:00"
 
 action:
   - variables:
       sun_elevation: "{{ state_attr('sun.sun', 'elevation') }}"
+      current_time: "{{ now().strftime('%H:%M:%S') }}"
   - choose:
-      # Daytime
+      # Early morning and evening (5 AM and sunset)
       - conditions:
-          - condition: numeric_state
-            entity_id: sun.sun
-            attribute: elevation
-            above: 0
+          - condition: or
+            conditions:
+              - condition: time
+                after: "05:00:00"
+                before: "05:01:00"
+              - condition: sun
+                after: sunset
+                before: sunset
+                offset: "00:01:00"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light_group
+            data:
+              brightness: 3  # 1% of 255
+              kelvin: 1000
+      # Daytime (after 5 AM and before sunset)
+      - conditions:
+          - condition: and
+            conditions:
+              - condition: time
+                after: "05:01:00"
+              - condition: sun
+                before: sunset
         sequence:
           - service: light.turn_on
             target:
@@ -39,16 +62,27 @@ action:
             data:
               brightness: "{{ (((sun_elevation | float) / 90) * 255) | round(0) }}"
               kelvin: "{{ ((((sun_elevation | float) / 90) * 4500) + 2000) | round(0) }}"
-      # Night time
+      # Night time (after sunset and before 10 PM)
       - conditions:
-          - condition: numeric_state
-            entity_id: sun.sun
-            attribute: elevation
-            below: 0
+          - condition: and
+            conditions:
+              - condition: sun
+                after: sunset
+              - condition: time
+                before: "22:00:00"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light_group
             data:
               brightness: 3  # 1% of 255
-              kelvin: 2000
+              kelvin: 1000
+      # Turn off at 10 PM
+      - conditions:
+          - condition: time
+            after: "22:00:00"
+            before: "05:00:00"
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: !input light_group
