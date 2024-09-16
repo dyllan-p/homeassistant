@@ -38,8 +38,6 @@ action:
                 before: "05:01:00"
               - condition: sun
                 after: sunset
-                before: sunset
-                offset: "00:01:00"
         sequence:
           - service: light.turn_on
             target:
