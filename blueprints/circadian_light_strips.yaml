@@ -1,0 +1,78 @@
+blueprint:
+  name: Circadian Lighting for TP-Link Light Strip
+  description: Adjusts brightness and color of TP-Link light strip based on sun position, turns on at 5am and off at 10pm
+  domain: automation
+  input:
+    light_strip:
+      name: Light Strip
+      description: The TP-Link light strip to control
+      selector:
+        entity:
+          domain: light
+          multiple: false
+
+variables:
+  light: !input light_strip
+
+trigger:
+  - platform: time_pattern
+    minutes: "/5"
+  - platform: sun
+    event: sunrise
+  - platform: sun
+    event: sunset
+  - platform: time
+    at: "05:00:00"
+  - platform: time
+    at: "22:00:00"
+
+action:
+  - variables:
+      sun_elevation: "{{ state_attr('sun.sun', 'elevation') }}"
+      current_time: "{{ now().strftime('%H:%M') }}"
+  - choose:
+      # Turn on at 5am
+      - conditions:
+          - condition: time
+            after: "05:00:00"
+            before: "22:00:00"
+        sequence:
+          - choose:
+              # Daytime
+              - conditions:
+                  - condition: numeric_state
+                    entity_id: sun.sun
+                    attribute: elevation
+                    above: 0
+                sequence:
+                  - service: light.turn_on
+                    target:
+                      entity_id: !input light_strip
+                    data:
+                      brightness: "{{ (((sun_elevation | float) / 90) * 255) | round(0) }}"
+                      rgb_color: >
+                        {% set temp = ((((sun_elevation | float) / 90) * 4500) + 2000) | round(0) %}
+                        {% set rgb = (1 - (temp - 2000) / (6500 - 2000)) %}
+                        {{ [255, (rgb * 255) | round(0), ((rgb**4) * 255) | round(0)] }}
+              # Night time (but before 10pm)
+              - conditions:
+                  - condition: numeric_state
+                    entity_id: sun.sun
+                    attribute: elevation
+                    below: 0
+                sequence:
+                  - service: light.turn_on
+                    target:
+                      entity_id: !input light_strip
+                    data:
+                      brightness: 3  # 1% of 255
+                      rgb_color: [255, 56, 0]  # Warm orange color
+      # Turn off at 10pm
+      - conditions:
+          - condition: time
+            after: "22:00:00"
+            before: "05:00:00"
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: !input light_strip
