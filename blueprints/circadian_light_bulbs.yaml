@@ -1,11 +1,11 @@
 blueprint:
-  name: Circadian Lighting for TP-Link Bulbs
-  description: Adjusts brightness and color temperature of TP-Link bulbs based on sun position, turns on at 5am and off at 10pm
+  name: Circadian Lighting for Light Bulbs
+  description: Adjusts brightness and color temperature of light bulbs based on sun position, turns on at 5am and off at 10pm
   domain: automation
   input:
     light_group:
       name: Light Group
-      description: The group of TP-Link lights to control
+      description: The group of light bulbs to control
       selector:
         entity:
           domain: light

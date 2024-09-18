@@ -1,11 +1,11 @@
 blueprint:
-  name: Circadian Lighting for TP-Link Light Strip
-  description: Adjusts brightness and color of TP-Link light strip based on sun position, turns on at 5am and off at 10pm
+  name: Circadian Lighting for Light Strips
+  description: Adjusts brightness and color of light strips based on sun position, turns on at 5am and off at 10pm
   domain: automation
   input:
     light_strip:
       name: Light Strip
-      description: The TP-Link light strip to control
+      description: The light strips to control
       selector:
         entity:
           domain: light
