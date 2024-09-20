@@ -10,8 +10,6 @@ blueprint:
         entity:
           domain: light
           multiple: true
-  variables:
-    lights: !input light_group
 
 trigger:
   - platform: time_pattern
