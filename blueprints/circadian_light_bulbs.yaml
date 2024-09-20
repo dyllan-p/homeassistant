@@ -1,6 +1,6 @@
 blueprint:
   name: Circadian Lighting for Light Bulbs
-  description: Adjusts brightness and color temperature of light bulbs based on the elevation of the sun.
+  description: Adjusts brightness and color temperature of light bulbs based on sun position
   domain: automation
   input:
     light_group:
@@ -10,6 +10,9 @@ blueprint:
         entity:
           domain: light
           multiple: true
+
+variables:
+  lights: !input light_group
 
 trigger:
   - platform: time_pattern
@@ -48,12 +51,5 @@ action:
             target:
               entity_id: !input light_group
             data:
-              brightness: "{{ [3, (((-sun_elevation | float) / 18) * 252 + 3) | round(0)] | min }}"
+              brightness: 3  # 1% of 255
               kelvin: 2000
-    default:
-      - service: light.turn_on
-        target:
-          entity_id: !input light_group
-        data:
-          brightness: 3
-          kelvin: 2000
