@@ -19,11 +19,10 @@ trigger:
   - platform: sun
     event: sunset
 
-variables:
-  sun_elevation: "{{ state_attr('sun.sun', 'elevation') }}"
-  current_time: "{{ now().strftime('%H:%M') }}"
-
-sequence:
+action:
+  - variables:
+      sun_elevation: "{{ state_attr('sun.sun', 'elevation') }}"
+      current_time: "{{ now().strftime('%H:%M') }}"
   - choose:
       # Daytime
       - conditions:
